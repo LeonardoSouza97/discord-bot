@@ -9,6 +9,9 @@ const youtubeApiKey = require('./config/youtubeApi.json').apiKey;
 const ytdl = require('ytdl-core');
 const request = require('request');
 
+//JSON - provisório
+const tokenDiscord = require('./config/discordApi.json').token;
+
 let configDiscord = new ConfigDiscord();
 
 var queue = [];
@@ -21,8 +24,8 @@ var args = null;
 var member = null;
 
 async function init() {
-    await configDiscord.getById(1).then(successCallback, failureCallback);
-    Client.login(configDiscord.token);
+    // await configDiscord.getById(1).then(successCallback, failureCallback);
+    Client.login(tokenDiscord);
 }
 
 init();
