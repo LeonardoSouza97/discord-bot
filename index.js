@@ -42,7 +42,7 @@ Client.on('message', msg => {
     if (msg.content.toLowerCase() == `ping`)
         msg.reply(`pong`);
     else if (msg.content.startsWith("!"))
-        msg.reply(processarComandos(msg));
+        processarComandos(msg);
 });
 
 function successCallback(result) {
@@ -60,12 +60,13 @@ function processarComandos(message) {
     if (message.content.startsWith("!")) {
         switch (comandoFormatado[0]) {
             case "music":
+                console.log('tamanho da fila', queue.length)
                 if (queue.length > 0 || isPlaying) {
                     getID(args, function (id) {
                         addtoQueue(id);
                         youtubeInfo(id, function (error, videoInfo) {
                             if (error) throw error
-                            message.reply(`Está tocando agora:` + videoInfo.title);
+                            message.reply(`Adicionou na fila: ` + videoInfo.title);
                         })
                     })
                 } else {
@@ -75,10 +76,14 @@ function processarComandos(message) {
                         playMusic(id, message);
                         youtubeInfo(id, function (error, videoInfo) {
                             if (error) throw error
-                            message.reply(`Está tocando agora:` + videoInfo.title);
+                            message.reply(`Está tocando agora: ` + videoInfo.title);
                         })
                     })
                 }
+                break;
+            case "skip":
+                message.reply('Pula não seu corno!')
+                removeQueue(message);
                 break;
             default:
                 mensagem = 'Comando não encontrado';
@@ -88,6 +93,7 @@ function processarComandos(message) {
 }
 
 function playMusic(id, message) {
+    console.log(`tamanho da fila`, queue);
     voiceChannel = message.member.voiceChannel;
 
     voiceChannel.join().then(function (connection) {
@@ -101,6 +107,7 @@ function playMusic(id, message) {
         dispatcher = connection.playStream(stream);
 
         dispatcher.on('end', function () {
+            console.log('ENTROU NO END')
             skipRequest = 0;
             skippers = [];
             queue.shift();
@@ -129,6 +136,19 @@ function addtoQueue(strId) {
         queue.push(getYoutubeID(strId));
     } else {
         queue.push(strId);
+    }
+}
+
+function removeQueue(message) {
+    console.log('removeu acionado')
+    if (queue.length != 0 || queue[0] != undefined) {
+        console.log(`esta tocando`, isPlaying);
+        console.log('musica id', queue[0]);
+        voiceChannel.leave();
+        isPlaying = true;
+        playMusic(queue[0], message);
+    } else {
+        message.reply('Não tem música pra pular não fi!')
     }
 }
 
